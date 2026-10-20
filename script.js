@@ -16,7 +16,7 @@ function addApplication() {
         <td class="${status.toLowerCase()}">${status}</td>
         <td>
         <button class="edit-btn" onclick="editRow(this)">Edit</button>
-        <button onclick="deleteRow(this)">Delete</button>
+        <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
         </td>
     `;
     table.appendChild(newRow);
@@ -107,7 +107,8 @@ function sortApplications() {
   if (sortBy === "company") columnIndex = 0;
   if (sortBy === "position") columnIndex = 1;
   if (sortBy === "date") columnIndex = 2;
-  if (sortBy === "status") columnIndex = 3;
+  if (sortBy === "interviewDate") columnIndex = 3
+  if (sortBy === "status") columnIndex = 4;
   rows.sort((a, b) => {
     if (sortBy === "date") {
       return new Date (a.cells[2].textContent) - 
@@ -123,7 +124,7 @@ saveApplications();
 }
 function exportCSV() {
   let csv =
-  "Company,Position,Date Applied,Status\n";
+  "Company,Position,Date Applied,Interview Date,Status\n";
   const rows =
   document.getElementById("applicationTable")
   .getElementsByTagName("tr");
