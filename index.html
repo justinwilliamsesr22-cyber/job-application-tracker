@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+  
+    <link rel="stylesheet" href="style.css">
+  </head>
+  
+  <body>
+    <div class="container">
+      <h1>Job Application Tracker</h1>
+    
+      <p id="counter">Total Applications: 0</p>
+    <div class="stats">
+      <p>Applied: <span id="appliedCount">0</span></p>
+      <p>Interviewing: <span id="interviewingCount">0</span></p>
+      <p>Offers: <span id="offerCount">0</span></p>
+      <p>Rejected: <span id="rejectedCount">0</span></p>
+    </div>
+    <div class="form">
+   
+    <input type="text" id="company" placeholder="Company Name">
+   
+    <input type="text" id="position" placeholder="Position" />
+   
+    <input type="date" id="date">
+
+    <select id="status">
+        <option>Applied</option>
+        <option>Interviewing</option>
+        <option>Offer</option>
+        <option>Rejected</option>
+      </select>
+      
+      <button onclick="addApplication()">Add Application</button>
+    </div> 
+    <div class="controls">
+    <input
+      type="text"
+      id="search"
+      placeholder="Search Companies..."
+      onkeyup="searchApplications()">
+    <button onclick="clearAll()">
+      Clear All Applications
+    </button>
+
+    <select id="sortOption" onchange="sortApplications()">
+      <option value="">Sort By</option>
+      <option value="company">Company</option>
+      <option value="position">Position</option>
+      <option value="date">Date Applied</option>
+      <option value="status">Status</option>
+    </select>
+
+    <button onclick="exportCSV()">
+      Export CSV
+    </button>
+    </div>
+      
+    <table>
+      <thead>
+      <tr>
+        <th>Company</th>
+        <th>Position</th>
+        <th>Date Applied</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      
+      <tbody id="applicationTable">
+      
+      </tbody>
+    
+    </table>
+    
+  </div>
+  
+    <script src="script.js"></script>
+  
+  </body>
+  </html>

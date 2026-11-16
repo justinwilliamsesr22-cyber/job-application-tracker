@@ -1,0 +1,122 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: white;
+  padding: 40px;
+}
+.container{
+  max-width: 900px;
+  margin: auto;
+  background: #1e1e1e;
+  padding: 25px;
+  border-radius: 10px;
+}
+h1 {
+  text-align: center;
+}
+.form {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+input,
+select,
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+button {
+  background: #0078d4;
+  color: white;
+  cursor: pointer;
+}
+button:hover {
+  background: #005ea6;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #333;
+  text-align: center;
+}
+.delete-btn {
+  background: #dc3545;
+  padding: 8px;
+}
+.delete-btn:hover {
+  background: #b02a37;
+}
+.applied {
+  color: #4da6ff;
+  font-weight: bold;
+}
+.interviewing {
+  color: orange;
+  font-weight: bold;
+}
+.offer {
+  color: limegreen;
+  font-weight: bold;
+}
+.rejected {
+  color: red;
+  font-weight: bold;
+}
+#counter {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+#search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.stats p {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+}
+button {
+  transition: 0.3s;
+  margin: 2px;
+}
+Button:hover {
+  transform: scale(1.05);
+}
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+.controls button,
+.controls select{
+  min-width: 150px;
+  margin-bottom:15px;
+}
+.controls input {
+  flex: 1;
+}
+
+.edit-btn {
+  background: #28a745;
+}
+.edit-btn:hover {
+  background: #218838;
+}
+
+
