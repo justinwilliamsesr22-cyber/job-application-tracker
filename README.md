@@ -1,14 +1,18 @@
 # Job Application Tracker
 
-A responsive, client-side web application built with vanilla HTML, CSS, and JavaScript to track job applications, monitor pipeline metrics, and export application history.
+A full-stack web application built with HTML5, CSS3, Vanilla JavaScript, and Supabase to track job applications, authenticate users, and monitor pipeline analytics in real time.
+
+## Live Demo
+[View Live Application](https://job-application-tracker-seven-mu.vercel.app/)
 
 ## Key Features
-- **Full CRUD Management:** Add, edit, and delete job applications with real-time DOM updates.
-- **Persistent Client Storage:** Automatically saves and restores application records using the browser's `localStorage` API.
+- **User Authentication & Cloud Sync:** Secure email/password sign-up and login powered by Supabase Auth, syncing application data across devices via PostgreSQL.
+- **Row-Level Security (RLS):** Database policies ensure authenticated users can only view, create, update, and delete their own records.
+- **Full CRUD Management:** Add, edit, and delete job applications with real-time DOM updates and XSS-safe HTML escaping.
 - **Live Pipeline Analytics:** Dynamically calculates total applications alongside status breakdowns (*Applied*, *Interviewing*, *Offer*, *Rejected*).
-- **Instant Search & Multi-Column Sorting:** Filter applications by company or role in real time and sort chronologically or alphabetically.
-- **One-Click CSV Export:** Generates and downloads a formatted `.csv` report directly in the browser using `Blob` and `URL.createObjectURL`.
+- **Instant Search, Sorting & CSV Export:** Filter applications by company or role in real time, sort by multiple columns, and export a formatted `.csv` report directly in the browser.
 
 ## Tech Stack
-- **Frontend:** HTML5, CSS3 (CSS Grid & Flexbox), Vanilla JavaScript (ES6+)
-- **Storage & Export:** Web Storage API (`localStorage`), Browser File/Blob API
+- **Frontend:** HTML5, CSS3 (Grid & Flexbox), Vanilla JavaScript (ES6+)
+- **Backend & Database:** Supabase (PostgreSQL, Auth, Row-Level Security)
+- **Deployment:** Vercel
