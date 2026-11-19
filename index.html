@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Application Tracker | Cloud Pipeline Dashboard</title>
+  <title>Job Application Tracker | MSJ Cloud Pipeline Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <!-- Supabase JS Client via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,10 +16,26 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="brand-logo">JT</div>
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="28" height="21" viewBox="0 0 64 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="msjGrad" x1="0" y1="0" x2="64" y2="46" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8" />
+                <stop offset="100%" stop-color="#818CF8" />
+              </linearGradient>
+            </defs>
+            <!-- Circuit Cloud Outline -->
+            <path d="M16 38H13C7.477 38 3 33.523 3 28C3 22.84 6.908 18.594 11.93 18.057C13.736 10.57 20.471 5 28.5 5C37.454 5 44.787 11.915 45.45 20.697C45.955 20.568 46.47 20.5 47 20.5C52.799 20.5 57.5 25.201 57.5 31C57.5 34.866 55.41 38.243 52.3 40.06" stroke="url(#msjGrad)" stroke-width="4" stroke-linecap="round"/>
+            <!-- Circuit Trace & Node -->
+            <path d="M23 38H44" stroke="url(#msjGrad)" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="22" cy="38" r="3.5" fill="#38BDF8"/>
+            <!-- MSJ Monogram -->
+            <text x="15" y="31" fill="#F8FAFC" font-family="Inter, sans-serif" font-weight="800" font-size="16" letter-spacing="-0.5">MSJ</text>
+          </svg>
+        </div>
         <div>
           <h1>Job Application Tracker</h1>
-          <span class="brand-subtitle">Cloud-Synced Career &amp; Pipeline Dashboard</span>
+          <span class="brand-subtitle">Powered by MSJ Cloud &bull; Tech &amp; Web Studio</span>
         </div>
       </div>
 
@@ -35,7 +51,7 @@
     <!-- Authentication Gate -->
     <section id="authSection" class="auth-card">
       <div class="auth-header">
-        <span class="pill-tag">Supabase Cloud Sync &bull; Row-Level Security</span>
+        <span class="pill-tag">MSJ Cloud &bull; Supabase Cloud Sync</span>
         <h2>Track Every Opportunity in One Place</h2>
         <p id="authStatus">Sign in to sync your applications across devices, or launch the interactive demo to explore the dashboard immediately.</p>
       </div>
@@ -182,7 +198,7 @@
   </main>
 
   <footer class="footer">
-    Full-Stack Cloud Application &bull; Built by <strong>MSJ Cloud</strong> &bull; Powered by Supabase &amp; Vercel
+    Full-Stack Cloud Application &bull; Built by <strong>MSJ Cloud</strong> &bull; Tech &amp; Web Studio
   </footer>
 
   <script src="script.js"></script>
