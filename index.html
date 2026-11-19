@@ -3,87 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Application Tracker</title>
+  <title>Job Application Tracker | Cloud Pipeline Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Supabase JS Client via CDN (No npm or build step needed) -->
+  <!-- Supabase JS Client via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Job Application Tracker</h1>
-
-    <!-- Authentication Bar -->
-    <div id="authSection" class="auth-box">
-      <p id="authStatus">Sign in to sync your applications to the cloud</p>
-      <div id="authForm" class="auth-controls">
-        <input type="email" id="authEmail" placeholder="Email address" />
-        <input type="password" id="authPassword" placeholder="Password (min 6 chars)" />
-        <button onclick="signIn()">Sign In</button>
-        <button class="signup-btn" onclick="signUp()">Create Account</button>
+  <!-- Top App Navigation -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-logo">JT</div>
+        <div>
+          <h1>Job Application Tracker</h1>
+          <span class="brand-subtitle">Cloud-Synced Career &amp; Pipeline Dashboard</span>
+        </div>
       </div>
+
       <div id="userBar" class="user-bar" style="display: none;">
-        <span id="userEmailDisplay"></span>
-        <button class="delete-btn" onclick="signOut()">Sign Out</button>
+        <span id="demoBadge" class="demo-badge" style="display: none;">Demo Mode</span>
+        <span id="userEmailDisplay" class="user-email"></span>
+        <button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button>
       </div>
     </div>
+  </header>
 
-    <!-- Main Tracker App (Shown when logged in) -->
+  <main class="container">
+    <!-- Authentication Gate -->
+    <section id="authSection" class="auth-card">
+      <div class="auth-header">
+        <span class="pill-tag">Supabase Cloud Sync &bull; Row-Level Security</span>
+        <h2>Track Every Opportunity in One Place</h2>
+        <p id="authStatus">Sign in to sync your applications across devices, or launch the interactive demo to explore the dashboard immediately.</p>
+      </div>
+
+      <div id="authForm" class="auth-controls">
+        <div class="input-group">
+          <input type="email" id="authEmail" placeholder="Email address" />
+          <input type="password" id="authPassword" placeholder="Password (min 6 chars)" />
+        </div>
+        <div class="auth-buttons">
+          <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+          <button class="btn btn-secondary" onclick="signUp()">Create Account</button>
+        </div>
+        <div class="demo-divider"><span>or</span></div>
+        <button class="btn btn-demo" onclick="startDemoMode()">
+          Launch Interactive Demo (No Sign-Up Required)
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Tracker Dashboard -->
     <div id="trackerApp" style="display: none;">
-      <p id="counter">Total Applications: 0</p>
-      <div class="stats">
-        <p>Applied: <span id="appliedCount">0</span></p>
-        <p>Interviewing: <span id="interviewingCount">0</span></p>
-        <p>Offers: <span id="offerCount">0</span></p>
-        <p>Rejected: <span id="rejectedCount">0</span></p>
-      </div>
+      <!-- KPI Summary Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Total Applications</span>
+          <strong class="kpi-value" id="counter">0</strong>
+          <span class="kpi-hint">All tracked roles</span>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <span class="kpi-label">Applied</span>
+          <strong class="kpi-value" id="appliedCount">0</strong>
+          <span class="kpi-hint">Awaiting response</span>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <span class="kpi-label">Interviewing</span>
+          <strong class="kpi-value" id="interviewingCount">0</strong>
+          <span class="kpi-hint">Active stages</span>
+        </div>
+        <div class="kpi-card kpi-emerald">
+          <span class="kpi-label">Offers</span>
+          <strong class="kpi-value" id="offerCount">0</strong>
+          <span class="kpi-hint">Final offers</span>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <span class="kpi-label">Response Rate</span>
+          <strong class="kpi-value" id="responseRate">0%</strong>
+          <span class="kpi-hint"><span id="rejectedCount">0</span> rejected</span>
+        </div>
+      </section>
 
-      <div class="form">
-        <input type="text" id="company" placeholder="Company Name" />
-        <input type="text" id="position" placeholder="Position" />
-        <input type="date" id="date" />
-        <select id="status">
-          <option>Applied</option>
-          <option>Interviewing</option>
-          <option>Offer</option>
-          <option>Rejected</option>
-        </select>
-        <button id="submitBtn" onclick="addApplication()">Add Application</button>
-      </div>
+      <!-- Add / Edit Application Card -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 id="formHeading">Add New Application</h2>
+          <button id="cancelEditBtn" class="btn btn-ghost btn-sm" style="display: none;" onclick="cancelEdit()">
+            Cancel Edit
+          </button>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="company">Company</label>
+            <input type="text" id="company" placeholder="e.g. Penn State Health" />
+          </div>
+          <div class="field">
+            <label for="position">Role / Position</label>
+            <input type="text" id="position" placeholder="e.g. IT Support Specialist" />
+          </div>
+          <div class="field">
+            <label for="date">Date Applied</label>
+            <input type="date" id="date" />
+          </div>
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="Applied">Applied</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Offer">Offer</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="field field-action">
+            <button id="submitBtn" class="btn btn-primary btn-full" onclick="addApplication()">
+              + Add Application
+            </button>
+          </div>
+        </div>
+      </section>
 
-      <div class="controls">
-        <input
-          type="text"
-          id="search"
-          placeholder="Search Companies..."
-          onkeyup="searchApplications()"
-        />
-        <button onclick="clearAll()">Clear All Applications</button>
+      <!-- Filter, Search & Export Toolbar -->
+      <section class="toolbar">
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-status="All" onclick="setStatusFilter('All', this)">All</button>
+          <button class="filter-tab" data-status="Applied" onclick="setStatusFilter('Applied', this)">Applied</button>
+          <button class="filter-tab" data-status="Interviewing" onclick="setStatusFilter('Interviewing', this)">Interviewing</button>
+          <button class="filter-tab" data-status="Offer" onclick="setStatusFilter('Offer', this)">Offers</button>
+          <button class="filter-tab" data-status="Rejected" onclick="setStatusFilter('Rejected', this)">Rejected</button>
+        </div>
 
-        <select id="sortOption" onchange="sortApplications()">
-          <option value="">Sort By</option>
-          <option value="company">Company</option>
-          <option value="position">Position</option>
-          <option value="date">Date Applied</option>
-          <option value="status">Status</option>
-        </select>
+        <div class="toolbar-actions">
+          <input
+            type="text"
+            id="search"
+            placeholder="Search company or role..."
+            onkeyup="applyFiltersAndSort()"
+          />
 
-        <button onclick="exportCSV()">Export CSV</button>
-      </div>
+          <select id="sortOption" onchange="applyFiltersAndSort()">
+            <option value="date">Sort: Newest First</option>
+            <option value="company">Sort: Company (A–Z)</option>
+            <option value="position">Sort: Position (A–Z)</option>
+            <option value="status">Sort: Status</option>
+          </select>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Company</th>
-            <th>Position</th>
-            <th>Date Applied</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="applicationTable"></tbody>
-      </table>
+          <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+          <button class="btn btn-danger-outline" onclick="clearAll()">Clear All</button>
+        </div>
+      </section>
+
+      <!-- Applications Table -->
+      <section class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Position</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationTable"></tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <p class="empty-title">No applications match your current view</p>
+          <p class="empty-sub">Add a new application above or clear your search/status filter.</p>
+        </div>
+      </section>
     </div>
-  </div>
+  </main>
+
+  <footer class="footer">
+    Full-Stack Cloud Application &bull; Built by <strong>MSJ Cloud</strong> &bull; Powered by Supabase &amp; Vercel
+  </footer>
 
   <script src="script.js"></script>
 </body>

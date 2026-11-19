@@ -5,6 +5,46 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 let applicationsData = [];
 let editingId = null;
+let currentStatusFilter = "All";
+let isDemoMode = false;
+
+const DEMO_APPLICATIONS = [
+  {
+    id: "demo-1",
+    company: "Penn State Health",
+    role_title: "IT Support Specialist I",
+    applied_date: "2026-11-14",
+    status: "Interviewing",
+  },
+  {
+    id: "demo-2",
+    company: "Commonwealth of Pennsylvania",
+    role_title: "Information Technology Generalist 1",
+    applied_date: "2026-11-16",
+    status: "Applied",
+  },
+  {
+    id: "demo-3",
+    company: "Best Buy (Geek Squad)",
+    role_title: "Consultation Agent",
+    applied_date: "2026-11-04",
+    status: "Offer",
+  },
+  {
+    id: "demo-4",
+    company: "UPMC Central PA",
+    role_title: "Service Desk Analyst",
+    applied_date: "2026-11-18",
+    status: "Applied",
+  },
+  {
+    id: "demo-5",
+    company: "Giant Food Stores Corporate",
+    role_title: "Junior Systems Technician",
+    applied_date: "2026-10-28",
+    status: "Rejected",
+  },
+];
 
 function escapeHTML(str) {
   if (!str) return "";
@@ -15,7 +55,7 @@ function escapeHTML(str) {
     .replace(/"/g, "&quot;");
 }
 
-// 2. Authentication Functions
+// 2. Authentication & Demo Mode Functions
 async function signUp() {
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value;
@@ -39,41 +79,72 @@ async function signIn() {
   if (error) {
     alert("Sign in error: " + error.message);
   } else {
+    isDemoMode = false;
     checkUserSession();
   }
 }
 
+function startDemoMode() {
+  isDemoMode = true;
+  applicationsData = [...DEMO_APPLICATIONS];
+  document.getElementById("authSection").style.display = "none";
+  document.getElementById("userBar").style.display = "flex";
+  document.getElementById("demoBadge").style.display = "inline-block";
+  document.getElementById("userEmailDisplay").textContent = "guest@msjcloud.demo";
+  document.getElementById("trackerApp").style.display = "block";
+  setDefaultDate();
+  applyFiltersAndSort();
+}
+
 async function signOut() {
-  await supabaseClient.auth.signOut();
+  if (!isDemoMode) {
+    await supabaseClient.auth.signOut();
+  }
+  isDemoMode = false;
   applicationsData = [];
   editingId = null;
+  resetForm();
   checkUserSession();
 }
 
 async function checkUserSession() {
+  if (isDemoMode) return;
+
   const { data: { session } } = await supabaseClient.auth.getSession();
-  const authForm = document.getElementById("authForm");
+  const authSection = document.getElementById("authSection");
   const userBar = document.getElementById("userBar");
   const trackerApp = document.getElementById("trackerApp");
-  const authStatus = document.getElementById("authStatus");
+  const demoBadge = document.getElementById("demoBadge");
 
   if (session && session.user) {
-    authForm.style.display = "none";
-    authStatus.style.display = "none";
+    authSection.style.display = "none";
     userBar.style.display = "flex";
-    document.getElementById("userEmailDisplay").textContent = "Signed in as: " + session.user.email;
+    demoBadge.style.display = "none";
+    document.getElementById("userEmailDisplay").textContent = session.user.email;
     trackerApp.style.display = "block";
+    setDefaultDate();
     loadApplications();
   } else {
-    authForm.style.display = "flex";
-    authStatus.style.display = "block";
+    authSection.style.display = "block";
     userBar.style.display = "none";
     trackerApp.style.display = "none";
   }
 }
 
+function setDefaultDate() {
+  const dateInput = document.getElementById("date");
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split("T")[0];
+  }
+}
+
 // 3. Load Applications from Supabase
 async function loadApplications() {
+  if (isDemoMode) {
+    applyFiltersAndSort();
+    return;
+  }
+
   const { data, error } = await supabaseClient
     .from("applications")
     .select("*")
@@ -85,33 +156,53 @@ async function loadApplications() {
   }
 
   applicationsData = data || [];
-  renderTable(applicationsData);
+  applyFiltersAndSort();
 }
 
 function renderTable(list) {
   const table = document.getElementById("applicationTable");
+  const emptyState = document.getElementById("emptyState");
   table.innerHTML = "";
 
+  if (list.length === 0) {
+    emptyState.style.display = "block";
+  } else {
+    emptyState.style.display = "none";
+  }
+
   list.forEach((app) => {
+    const statusClass = `status-${escapeHTML(app.status).toLowerCase()}`;
     const newRow = document.createElement("tr");
     newRow.innerHTML = `
-      <td>${escapeHTML(app.company)}</td>
-      <td>${escapeHTML(app.role_title)}</td>
-      <td>${escapeHTML(app.applied_date)}</td>
-      <td class="${escapeHTML(app.status).toLowerCase()}">${escapeHTML(app.status)}</td>
+      <td class="company-cell">${escapeHTML(app.company)}</td>
+      <td class="role-cell">${escapeHTML(app.role_title)}</td>
+      <td class="date-cell">${escapeHTML(app.applied_date)}</td>
       <td>
-        <button class="edit-btn" onclick="editRow('${app.id}')">Edit</button>
-        <button class="delete-btn" onclick="deleteRow('${app.id}')">Delete</button>
+        <select
+          class="status-select ${statusClass}"
+          onchange="quickStatusUpdate('${app.id}', this.value)"
+          aria-label="Application status"
+        >
+          <option value="Applied" ${app.status === "Applied" ? "selected" : ""}>Applied</option>
+          <option value="Interviewing" ${app.status === "Interviewing" ? "selected" : ""}>Interviewing</option>
+          <option value="Offer" ${app.status === "Offer" ? "selected" : ""}>Offer</option>
+          <option value="Rejected" ${app.status === "Rejected" ? "selected" : ""}>Rejected</option>
+        </select>
+      </td>
+      <td class="text-right">
+        <div class="row-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editRow('${app.id}')">Edit</button>
+          <button class="btn btn-danger-outline btn-sm" onclick="deleteRow('${app.id}')">Delete</button>
+        </div>
       </td>
     `;
     table.appendChild(newRow);
   });
 
-  updateCounter();
   updateStats();
 }
 
-// 4. Add or Update Application in Supabase
+// 4. Add, Update & Quick Status Change
 async function addApplication() {
   const company = document.getElementById("company").value.trim();
   const role_title = document.getElementById("position").value.trim();
@@ -119,22 +210,39 @@ async function addApplication() {
   const status = document.getElementById("status").value;
 
   if (company === "" || role_title === "" || applied_date === "") {
-    alert("Please fill out all fields.");
+    alert("Please fill out Company, Role, and Date Applied.");
+    return;
+  }
+
+  if (isDemoMode) {
+    if (editingId !== null) {
+      applicationsData = applicationsData.map((item) =>
+        String(item.id) === String(editingId)
+          ? { ...item, company, role_title, applied_date, status }
+          : item
+      );
+    } else {
+      applicationsData.unshift({
+        id: "demo-" + Date.now(),
+        company,
+        role_title,
+        applied_date,
+        status,
+      });
+    }
+    resetForm();
+    applyFiltersAndSort();
     return;
   }
 
   if (editingId !== null) {
-    // Update existing row
     const { error } = await supabaseClient
       .from("applications")
       .update({ company, role_title, applied_date, status })
       .eq("id", editingId);
 
     if (error) return alert("Update failed: " + error.message);
-    editingId = null;
-    document.getElementById("submitBtn").textContent = "Add Application";
   } else {
-    // Insert new row
     const { error } = await supabaseClient
       .from("applications")
       .insert([{ company, role_title, applied_date, status }]);
@@ -142,11 +250,28 @@ async function addApplication() {
     if (error) return alert("Save failed: " + error.message);
   }
 
-  document.getElementById("company").value = "";
-  document.getElementById("position").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("status").value = "Applied";
+  resetForm();
+  loadApplications();
+}
 
+async function quickStatusUpdate(id, newStatus) {
+  if (isDemoMode) {
+    applicationsData = applicationsData.map((item) =>
+      String(item.id) === String(id) ? { ...item, status: newStatus } : item
+    );
+    applyFiltersAndSort();
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("applications")
+    .update({ status: newStatus })
+    .eq("id", id);
+
+  if (error) {
+    alert("Status update failed: " + error.message);
+    return;
+  }
   loadApplications();
 }
 
@@ -160,11 +285,35 @@ function editRow(id) {
   document.getElementById("status").value = app.status;
 
   editingId = app.id;
+  document.getElementById("formHeading").textContent = "Edit Application";
   document.getElementById("submitBtn").textContent = "Save Changes";
+  document.getElementById("cancelEditBtn").style.display = "inline-flex";
   document.getElementById("company").focus();
 }
 
+function cancelEdit() {
+  resetForm();
+}
+
+function resetForm() {
+  editingId = null;
+  document.getElementById("company").value = "";
+  document.getElementById("position").value = "";
+  document.getElementById("date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("status").value = "Applied";
+  document.getElementById("formHeading").textContent = "Add New Application";
+  document.getElementById("submitBtn").textContent = "+ Add Application";
+  document.getElementById("cancelEditBtn").style.display = "none";
+}
+
 async function deleteRow(id) {
+  if (isDemoMode) {
+    applicationsData = applicationsData.filter((item) => String(item.id) !== String(id));
+    if (String(editingId) === String(id)) resetForm();
+    applyFiltersAndSort();
+    return;
+  }
+
   const { error } = await supabaseClient
     .from("applications")
     .delete()
@@ -175,13 +324,19 @@ async function deleteRow(id) {
     return;
   }
 
-  editingId = null;
-  document.getElementById("submitBtn").textContent = "Add Application";
+  if (String(editingId) === String(id)) resetForm();
   loadApplications();
 }
 
 async function clearAll() {
-  if (!confirm("Delete all applications from your database?")) return;
+  if (!confirm("Delete all applications from your current list?")) return;
+
+  if (isDemoMode) {
+    applicationsData = [];
+    resetForm();
+    applyFiltersAndSort();
+    return;
+  }
 
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
@@ -196,18 +351,13 @@ async function clearAll() {
     return;
   }
 
-  editingId = null;
-  document.getElementById("submitBtn").textContent = "Add Application";
+  resetForm();
   loadApplications();
 }
 
-// 5. Stats, Search, Sort & CSV Export
-function updateCounter() {
-  document.getElementById("counter").textContent =
-    "Total Applications: " + applicationsData.length;
-}
-
+// 5. KPI Stats, Filtering, Sorting & CSV Export
 function updateStats() {
+  const total = applicationsData.length;
   let applied = 0;
   let interviewing = 0;
   let offer = 0;
@@ -220,35 +370,44 @@ function updateStats() {
     if (app.status === "Rejected") rejected++;
   });
 
+  const rate = total > 0 ? Math.round(((interviewing + offer) / total) * 100) : 0;
+
+  document.getElementById("counter").textContent = total;
   document.getElementById("appliedCount").textContent = applied;
   document.getElementById("interviewingCount").textContent = interviewing;
   document.getElementById("offerCount").textContent = offer;
   document.getElementById("rejectedCount").textContent = rejected;
+  document.getElementById("responseRate").textContent = `${rate}%`;
 }
 
-function searchApplications() {
-  const search = document.getElementById("search").value.toLowerCase();
-  const filtered = applicationsData.filter(
-    (app) =>
-      app.company.toLowerCase().includes(search) ||
-      app.role_title.toLowerCase().includes(search)
-  );
-  renderTable(filtered);
+function setStatusFilter(status, tabEl) {
+  currentStatusFilter = status;
+  document.querySelectorAll(".filter-tab").forEach((btn) => btn.classList.remove("active"));
+  if (tabEl) tabEl.classList.add("active");
+  applyFiltersAndSort();
 }
 
-function sortApplications() {
+function applyFiltersAndSort() {
+  const search = document.getElementById("search").value.toLowerCase().trim();
   const sortBy = document.getElementById("sortOption").value;
-  if (!sortBy) return;
 
-  const sorted = [...applicationsData].sort((a, b) => {
-    if (sortBy === "company") return a.company.localeCompare(b.company);
-    if (sortBy === "position") return a.role_title.localeCompare(b.role_title);
-    if (sortBy === "date") return new Date(b.applied_date) - new Date(a.applied_date);
-    if (sortBy === "status") return a.status.localeCompare(b.status);
-    return 0;
+  let result = applicationsData.filter((app) => {
+    const matchesStatus =
+      currentStatusFilter === "All" || app.status === currentStatusFilter;
+    const matchesSearch =
+      app.company.toLowerCase().includes(search) ||
+      app.role_title.toLowerCase().includes(search);
+    return matchesStatus && matchesSearch;
   });
 
-  renderTable(sorted);
+  result.sort((a, b) => {
+    if (sortBy === "company") return a.company.localeCompare(b.company);
+    if (sortBy === "position") return a.role_title.localeCompare(b.role_title);
+    if (sortBy === "status") return a.status.localeCompare(b.status);
+    return new Date(b.applied_date) - new Date(a.applied_date);
+  });
+
+  renderTable(result);
 }
 
 function exportCSV() {
